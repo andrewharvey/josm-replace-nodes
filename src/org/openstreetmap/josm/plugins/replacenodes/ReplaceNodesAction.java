@@ -178,6 +178,12 @@ public class ReplaceNodesAction extends JosmAction {
 
     /** Flips the new node list if the source runs opposite to the target. */
     private boolean shouldReverse(Way target, Way source) {
+        // For a closed coastline the OSM rule is sea-on-right, which means
+        // counter-clockwise winding in lat/lon. Reverse the source nodes if
+        // they are clockwise so the result honours the convention.
+        if (target.isClosed() && target.hasTag("natural", "coastline")) {
+            return isClockwise(source.getNodes());
+        }
         if (target.isClosed() || source.isClosed() || target.getNodesCount() < 2) {
             return false;
         }
@@ -191,6 +197,22 @@ public class ReplaceNodesAction extends JosmAction {
         double sameDir = ts.greatCircleDistance(ss) + te.greatCircleDistance(se);
         double flipped = ts.greatCircleDistance(se) + te.greatCircleDistance(ss);
         return flipped < sameDir;
+    }
+
+    /**
+     * Trapezoidal shoelace in lon/lat: positive sum = clockwise, negative = CCW.
+     * (Opposite sign to the standard cross-product shoelace because the formula
+     * integrates in the direction of increasing longitude.)
+     */
+    private boolean isClockwise(List<Node> nodes) {
+        double sum = 0;
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            LatLon a = nodes.get(i).getCoor();
+            LatLon b = nodes.get(i + 1).getCoor();
+            if (a == null || b == null) return false;
+            sum += (b.lon() - a.lon()) * (b.lat() + a.lat());
+        }
+        return sum > 0;
     }
 
     private void warn(String message) {
