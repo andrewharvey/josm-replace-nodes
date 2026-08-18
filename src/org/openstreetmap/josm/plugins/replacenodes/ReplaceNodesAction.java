@@ -41,7 +41,7 @@ public class ReplaceNodesAction extends JosmAction {
                 tr("Replaces the node list of the first selected way with the nodes of the second"),
                 Shortcut.registerShortcut("replacenodes:replace",
                         tr("Tools: {0}", tr("Replace nodes")),
-                        KeyEvent.VK_R, Shortcut.ALT_CTRL_SHIFT),
+                        KeyEvent.VK_R, Shortcut.DIRECT),
                 true);
     }
 
