@@ -7,8 +7,10 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
@@ -16,6 +18,7 @@ import javax.swing.JOptionPane;
 import org.openstreetmap.josm.actions.JosmAction;
 import org.openstreetmap.josm.command.ChangeCommand;
 import org.openstreetmap.josm.command.ChangeNodesCommand;
+import org.openstreetmap.josm.command.ChangePropertyCommand;
 import org.openstreetmap.josm.command.Command;
 import org.openstreetmap.josm.command.DeleteCommand;
 import org.openstreetmap.josm.command.SequenceCommand;
@@ -97,6 +100,18 @@ public class ReplaceNodesAction extends JosmAction {
         List<Command> cmds = new ArrayList<>();
         cmds.add(new ChangeNodesCommand(ds, target, newNodes));
 
+        // Merge source tags into target; target value wins on conflict.
+        Map<String, String> targetTags = target.getKeys();
+        Map<String, String> tagsToAdd = new HashMap<>();
+        for (Map.Entry<String, String> entry : source.getKeys().entrySet()) {
+            if (!targetTags.containsKey(entry.getKey())) {
+                tagsToAdd.put(entry.getKey(), entry.getValue());
+            }
+        }
+        if (!tagsToAdd.isEmpty()) {
+            cmds.add(new ChangePropertyCommand(ds, Collections.singleton(target), tagsToAdd));
+        }
+
         // Transfer relation memberships from source to target before deleting source.
         for (OsmPrimitive ref : source.getReferrers()) {
             if (!(ref instanceof Relation)) continue;
@@ -135,8 +150,8 @@ public class ReplaceNodesAction extends JosmAction {
         UndoRedoHandler.getInstance().add(new SequenceCommand(tr("Replace nodes"), cmds));
         ds.setSelected(Collections.singleton(target));
 
-        new Notification(tr("Replaced geometry with {0} nodes; removed {1} orphaned node(s).",
-                newNodes.size(), orphans.size())).show();
+        new Notification(tr("Replaced geometry with {0} nodes; merged {1} tag(s); removed {2} orphaned node(s).",
+                newNodes.size(), tagsToAdd.size(), orphans.size())).show();
     }
 
     /**
