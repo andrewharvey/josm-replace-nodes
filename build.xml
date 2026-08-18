@@ -1,0 +1,28 @@
+<project name="replace-nodes" default="dist" basedir=".">
+  <property name="plugin.class" value="org.openstreetmap.josm.plugins.replacenodes.ReplaceNodesPlugin"/>
+  <property name="josm.jar" location="/usr/share/josm/josm.jar"/>
+
+  <target name="compile">
+    <mkdir dir="build"/>
+    <javac srcdir="src" destdir="build" includeantruntime="false"
+           release="17" encoding="UTF-8" debug="true">
+      <classpath><pathelement location="${josm.jar}"/></classpath>
+    </javac>
+  </target>
+
+  <target name="dist" depends="compile">
+    <mkdir dir="dist"/>
+    <jar destfile="dist/replace-nodes.jar" basedir="build">
+      <manifest>
+        <attribute name="Plugin-Class" value="${plugin.class}"/>
+        <attribute name="Plugin-Version" value="1"/>
+        <attribute name="Plugin-Mainversion" value="18700"/>
+        <attribute name="Plugin-Description"
+                   value="Replaces the geometry of one way with the nodes of another."/>
+        <attribute name="Author" value="you"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean"><delete dir="build"/><delete dir="dist"/></target>
+</project>
