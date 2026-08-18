@@ -1,5 +1,5 @@
 dist:
 	ant dist
 
-deploy:
+install:
 	cp dist/replace-nodes.jar ~/.josm/plugins/
