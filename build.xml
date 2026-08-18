@@ -12,7 +12,9 @@
 
   <target name="dist" depends="compile">
     <mkdir dir="dist"/>
-    <jar destfile="dist/replace-nodes.jar" basedir="build">
+    <jar destfile="dist/replace-nodes.jar">
+      <fileset dir="build"/>
+      <fileset dir="." includes="images/**"/>
       <manifest>
         <attribute name="Plugin-Class" value="${plugin.class}"/>
         <attribute name="Plugin-Version" value="1"/>
