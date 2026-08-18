@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 
 import org.openstreetmap.josm.actions.JosmAction;
+import org.openstreetmap.josm.command.ChangeCommand;
 import org.openstreetmap.josm.command.ChangeNodesCommand;
 import org.openstreetmap.josm.command.Command;
 import org.openstreetmap.josm.command.DeleteCommand;
@@ -23,6 +24,8 @@ import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.osm.DataSet;
 import org.openstreetmap.josm.data.osm.Node;
 import org.openstreetmap.josm.data.osm.OsmPrimitive;
+import org.openstreetmap.josm.data.osm.Relation;
+import org.openstreetmap.josm.data.osm.RelationMember;
 import org.openstreetmap.josm.data.osm.Way;
 import org.openstreetmap.josm.gui.MainApplication;
 import org.openstreetmap.josm.gui.Notification;
@@ -93,6 +96,32 @@ public class ReplaceNodesAction extends JosmAction {
 
         List<Command> cmds = new ArrayList<>();
         cmds.add(new ChangeNodesCommand(ds, target, newNodes));
+
+        // Transfer relation memberships from source to target before deleting source.
+        for (OsmPrimitive ref : source.getReferrers()) {
+            if (!(ref instanceof Relation)) continue;
+            Relation rel = (Relation) ref;
+            List<RelationMember> members = new ArrayList<>(rel.getMembers());
+            boolean changed = false;
+            for (int i = 0; i < members.size(); i++) {
+                RelationMember m = members.get(i);
+                if (!m.getMember().equals(source)) continue;
+                String role = m.getRole();
+                boolean targetAlreadyPresent = members.stream()
+                        .anyMatch(x -> x.getMember().equals(target) && x.getRole().equals(role));
+                if (targetAlreadyPresent) {
+                    members.remove(i--);
+                } else {
+                    members.set(i, new RelationMember(role, target));
+                }
+                changed = true;
+            }
+            if (changed) {
+                Relation updated = new Relation(rel);
+                updated.setMembers(members);
+                cmds.add(new ChangeCommand(rel, updated));
+            }
+        }
 
         // The source way is now redundant. Its nodes are kept: they belong to the target now.
         cmds.add(new DeleteCommand(ds, Collections.singleton(source)));
