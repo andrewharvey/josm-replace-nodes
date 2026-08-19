@@ -42,7 +42,7 @@ public class ReplaceNodesAction extends JosmAction {
                 Shortcut.registerShortcut("replacenodes:replace",
                         tr("Tools: {0}", tr("Replace nodes")),
                         KeyEvent.VK_R, Shortcut.DIRECT),
-                true);
+                true, "replacenodes", true);
     }
 
     @Override
