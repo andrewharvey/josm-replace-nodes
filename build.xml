@@ -1,30 +1,40 @@
 <project name="replace-nodes" default="dist" basedir=".">
   <property name="plugin.class" value="org.openstreetmap.josm.plugins.replacenodes.ReplaceNodesPlugin"/>
+  <property name="plugin.main.version" value="19044"/>
+  <property name="plugin.version" value="1.0"/>
+  <property name="plugin.author" value="Andrew Harvey"/>
+  <property name="plugin.description" value="Replaces the geometry of one way with the nodes of another."/>
+
   <property name="josm.jar" location="/usr/share/josm/josm.jar"/>
+  <property name="src.dir" location="src"/>
+  <property name="build.dir" location="build"/>
+  <property name="dist.dir" location="dist"/>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+    <delete dir="${dist.dir}"/>
+  </target>
 
   <target name="compile">
-    <mkdir dir="build"/>
-    <javac srcdir="src" destdir="build" includeantruntime="false"
-           release="17" encoding="UTF-8" debug="true">
+    <mkdir dir="${build.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${build.dir}" release="17"
+           encoding="UTF-8" includeantruntime="false" debug="true">
       <classpath><pathelement location="${josm.jar}"/></classpath>
     </javac>
   </target>
 
   <target name="dist" depends="compile">
-    <mkdir dir="dist"/>
-    <jar destfile="dist/replace-nodes.jar">
-      <fileset dir="build"/>
-      <fileset dir="." includes="images/**"/>
+    <mkdir dir="${dist.dir}"/>
+    <jar destfile="${dist.dir}/replace-nodes.jar" basedir="${build.dir}">
+      <fileset dir="resources" erroronmissingdir="false"/>
       <manifest>
         <attribute name="Plugin-Class" value="${plugin.class}"/>
-        <attribute name="Plugin-Version" value="1"/>
-        <attribute name="Plugin-Mainversion" value="18700"/>
-        <attribute name="Plugin-Description"
-                   value="Replaces the geometry of one way with the nodes of another."/>
-        <attribute name="Author" value="you"/>
+        <attribute name="Plugin-Description" value="${plugin.description}"/>
+        <attribute name="Plugin-Mainversion" value="${plugin.main.version}"/>
+        <attribute name="Plugin-Version" value="${plugin.version}"/>
+        <attribute name="Author" value="${plugin.author}"/>
+        <attribute name="Plugin-Canloadatruntime" value="true"/>
       </manifest>
     </jar>
   </target>
-
-  <target name="clean"><delete dir="build"/><delete dir="dist"/></target>
 </project>
