@@ -13,3 +13,5 @@ Hence this tool was born, by way of a few LLM prompts, to fulfil that requiremen
 
    make build
    make install
+
+Then in JOSM, enable the plugin via Preferences > Plugins.
