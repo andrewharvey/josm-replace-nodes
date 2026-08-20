@@ -9,9 +9,18 @@ However that tool will refuse to operate on two existing ways, it requires one t
 
 Hence this tool was born, by way of a few LLM prompts, to fulfil that requirement.
 
-## How to build and install
+## Example
+Take this example where we have the original `natural=coastline` way added to OSM many years ago, and another `boundary=protected_area` way imported more recently. If we decide to instead want to use the original `natural=coastline` as the `boundary=protected_area` way, we may select both and apply this tool, resulting in a way that has the history of the `natural=coastline` but uses the nodes from the imported `boundary=protected_area` way while still retaining any relation memberships.
 
-   make build
-   make install
+<figure>
+  <img src="docs/josm-screenshot.png" alt="JOSM Screenshot of two ways to be merged">
+  <figcaption>JOSM Screenshot of two ways to be merged using the josm-replace-nodes tool. Image Credit: Aerial Imagery CC BY 4.0, Department of Customer Service (NSW, AU). Data OpenStreetMap Contributors, CAPAD.</figcaption>
+</figure>
+
+## How to build and install
+```sh
+make build
+make install
+```
 
 Then in JOSM, enable the plugin via Preferences > Plugins.
